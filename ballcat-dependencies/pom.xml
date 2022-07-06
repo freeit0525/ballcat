@@ -8,7 +8,7 @@
 	<version>${revision}</version>
 	<packaging>pom</packaging>
 
-	<name>Ballcat Dependencies</name>
+	<name>ballcat-dependencies</name>
 	<description>Ballcat Dependencies</description>
 	<url>https://github.com/hccake/ballcat</url>
 
@@ -42,22 +42,21 @@
 		<flatten-maven-plugin.version>1.2.7</flatten-maven-plugin.version>
 		<spring-javaformat-checkstyle.version>0.0.31</spring-javaformat-checkstyle.version>
 
-		<spring-boot.version>2.7.0</spring-boot.version>
-		<spring-boot-admin.version>2.6.6</spring-boot-admin.version>
+		<spring-boot.version>2.7.1</spring-boot.version>
 		<spring-security-oauth2.version>2.3.8.RELEASE</spring-security-oauth2.version>
 		<springfox.version>3.0.0</springfox.version>
 		<swagger.version>1.5.21</swagger.version>
 		<io.swagger.v3.version>2.2.0</io.swagger.v3.version>
 		<springdoc-openapi.verison>1.6.9</springdoc-openapi.verison>
 		<kafka.version>2.6.3</kafka.version>
-		<hutool.version>5.7.22</hutool.version>
+		<hutool.version>5.8.3</hutool.version>
 		<fastjson.version>1.2.83</fastjson.version>
 		<mybatis-plus.version>3.5.2</mybatis-plus.version>
 		<mybatis.version>3.5.10</mybatis.version>
-		<jsqlparser.version>4.4</jsqlparser.version>
+		<jsqlparser.version>4.3</jsqlparser.version>
 		<dynamic-datasource.version>3.5.1</dynamic-datasource.version>
-		<xxl-job.version>2.3.0</xxl-job.version>
-		<easyexcel.version>3.0.5</easyexcel.version>
+		<xxl-job.version>2.3.1</xxl-job.version>
+		<easyexcel.version>3.1.1</easyexcel.version>
 		<poi.version>4.1.2</poi.version>
 		<jasypt.version>3.0.4</jasypt.version>
 		<jsoup.version>1.14.3</jsoup.version>
@@ -88,19 +87,6 @@
 				<artifactId>spring-security-oauth2</artifactId>
 				<version>${spring-security-oauth2.version}</version>
 			</dependency>
-			<!--web 模块-->
-			<dependency>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-starter-web</artifactId>
-				<version>${spring-boot.version}</version>
-				<exclusions>
-					<!--排除tomcat依赖-->
-					<exclusion>
-						<artifactId>spring-boot-starter-tomcat</artifactId>
-						<groupId>org.springframework.boot</groupId>
-					</exclusion>
-				</exclusions>
-			</dependency>
 
 			<!-- hutool工具类 -->
 			<dependency>
@@ -110,16 +96,6 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
-
-			<!-- spring-boot-admin 监控依赖 -->
-			<dependency>
-				<groupId>de.codecentric</groupId>
-				<artifactId>spring-boot-admin-dependencies</artifactId>
-				<version>${spring-boot-admin.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-
 
 			<!-- ballcat 自身模块版本 -->
 			<dependency>
