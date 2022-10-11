@@ -1,6 +1,10 @@
 package com.hccake.ballcat.common.util;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 import java.io.BufferedReader;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -9,8 +13,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
 
 /**
  * @author lingting 2021/4/21 17:45
@@ -27,7 +29,6 @@ public class StreamUtils {
 	 * 克隆文件流
 	 * @param stream 源流
 	 * @param amounts 数量
-	 * @author lingting 2021-04-16 16:18
 	 */
 	public static InputStream[] clone(InputStream stream, Integer amounts) throws IOException {
 		return clone(stream, amounts, DEFAULT_SIZE);
@@ -69,7 +70,6 @@ public class StreamUtils {
 
 	/**
 	 * 流转字符串
-	 * @author lingting 2021-04-29 18:07
 	 */
 	public static String toString(InputStream stream) throws IOException {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
@@ -85,7 +85,6 @@ public class StreamUtils {
 	 * 将输入流内容写入输出流
 	 * @param inputStream 输入流
 	 * @param outputStream 输出流
-	 * @author lingting 2021-10-19 22:41
 	 */
 	public static void write(InputStream inputStream, OutputStream outputStream) throws IOException {
 		write(inputStream, outputStream, DEFAULT_SIZE);
@@ -102,7 +101,6 @@ public class StreamUtils {
 
 	/**
 	 * 从流中读取 int
-	 * @author lingting 2021-07-22 14:54
 	 */
 	public static int readInt(InputStream is, int noOfBytes, boolean bigEndian) throws IOException {
 		int ret = 0;
@@ -113,6 +111,17 @@ public class StreamUtils {
 			sv += cnt;
 		}
 		return ret;
+	}
+
+	public static void close(Closeable closeable) {
+		try {
+			if (closeable != null) {
+				closeable.close();
+			}
+		}
+		catch (Exception e) {
+			//
+		}
 	}
 
 }

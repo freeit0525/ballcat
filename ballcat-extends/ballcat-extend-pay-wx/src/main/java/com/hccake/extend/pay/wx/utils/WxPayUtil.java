@@ -66,7 +66,6 @@ public final class WxPayUtil {
 	 * map 转 xml 字符串
 	 * @param data map
 	 * @return java.lang.String
-	 * @author lingting 2021-02-01 10:22
 	 */
 	public static String mapToXml(Map<String, String> data) throws ParserConfigurationException, TransformerException {
 		Document document = getDocument();
@@ -107,7 +106,6 @@ public final class WxPayUtil {
 	 * xml字符串转map
 	 * @param xml xml字符串
 	 * @return java.util.Map<java.lang.String,java.lang.String>
-	 * @author lingting 2021-02-01 11:29
 	 */
 	public static Map<String, String> xmlToMap(String xml)
 			throws ParserConfigurationException, IOException, SAXException {
@@ -139,7 +137,6 @@ public final class WxPayUtil {
 	 * @param params 参数
 	 * @param mckKey 密钥
 	 * @return java.lang.String 签名结果
-	 * @author lingting 2021-01-29 18:13
 	 */
 	public static String sign(Map<String, String> params, String mckKey) {
 		SignType st = SignType.of(params.get(WxPayConstant.FIELD_SIGN_TYPE));
@@ -192,7 +189,6 @@ public final class WxPayUtil {
 	/**
 	 * 生成随机字符串
 	 * @return java.lang.String
-	 * @author lingting 2021-02-25 14:42
 	 */
 	public static String generateNonceStr() {
 		return RandomUtil.randomString(16);
