@@ -1,14 +1,21 @@
 package org.ballcat.springsecurity.oauth2.server.authorization.configurer;
 
 import lombok.RequiredArgsConstructor;
-import org.ballcat.security.captcha.CaptchaValidator;
-import org.ballcat.security.properties.SecurityProperties;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
+import org.springframework.security.web.util.matcher.AndRequestMatcher;
+import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
+import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestHeaderRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.web.accept.ContentNegotiationStrategy;
+import org.springframework.web.accept.HeaderContentNegotiationStrategy;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -22,11 +29,9 @@ import java.util.List;
 @Order(99)
 public class OAuth2AuthorizationServerConfigurerAdapter extends WebSecurityConfigurerAdapter {
 
-	private final SecurityProperties securityProperties;
-
 	private final List<OAuth2AuthorizationServerConfigurerCustomizer> oAuth2AuthorizationServerConfigurerCustomizerList;
 
-	private final CaptchaValidator captchaValidator;
+	private final List<OAuth2AuthorizationServerExtensionConfigurer> oAuth2AuthorizationServerExtensionConfigurers;
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
@@ -36,16 +41,33 @@ public class OAuth2AuthorizationServerConfigurerAdapter extends WebSecurityConfi
 			customizer.customize(authorizationServerConfigurer, http);
 		}
 
-		// 授权服务器配置包装，添加验证码以及密码加解密处理
-		OAuth2AuthorizationServerConfigurerWrapper configurerWrapper = new OAuth2AuthorizationServerConfigurerWrapper(
-				authorizationServerConfigurer, securityProperties, captchaValidator);
-
 		// @formatter:off
-		RequestMatcher endpointsMatcher = configurerWrapper.getEndpointsMatcher();
-		http.requestMatcher(endpointsMatcher)
+		RequestMatcher endpointsMatcher = authorizationServerConfigurer.getEndpointsMatcher();
+		http.requestMatchers()
+				.requestMatchers(endpointsMatcher)
+				.and()
 				.authorizeRequests(authorizeRequests -> authorizeRequests.anyRequest().authenticated())
 				.csrf(csrf -> csrf.ignoringRequestMatchers(endpointsMatcher))
-				.apply(configurerWrapper);
+				.apply(authorizationServerConfigurer);
 		// @formatter:off
+
+		for (OAuth2AuthorizationServerExtensionConfigurer configurer : oAuth2AuthorizationServerExtensionConfigurers) {
+			http.apply(configurer);
+		}
+	}
+
+
+	protected final RequestMatcher getAuthenticationEntryPointMatcher(HttpSecurity http) {
+		ContentNegotiationStrategy contentNegotiationStrategy = http.getSharedObject(ContentNegotiationStrategy.class);
+		if (contentNegotiationStrategy == null) {
+			contentNegotiationStrategy = new HeaderContentNegotiationStrategy();
+		}
+		MediaTypeRequestMatcher mediaMatcher = new MediaTypeRequestMatcher(contentNegotiationStrategy,
+				MediaType.APPLICATION_XHTML_XML, new MediaType("image", "*"), MediaType.TEXT_HTML,
+				MediaType.TEXT_PLAIN);
+		mediaMatcher.setIgnoredMediaTypes(Collections.singleton(MediaType.ALL));
+		RequestMatcher notXRequestedWith = new NegatedRequestMatcher(
+				new RequestHeaderRequestMatcher("X-Requested-With", "XMLHttpRequest"));
+		return new AndRequestMatcher(Arrays.asList(notXRequestedWith, mediaMatcher));
 	}
 }

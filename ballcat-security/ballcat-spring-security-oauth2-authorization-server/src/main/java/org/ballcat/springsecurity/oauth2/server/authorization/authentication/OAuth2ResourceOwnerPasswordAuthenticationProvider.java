@@ -6,6 +6,8 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClaimAccessor;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
@@ -35,6 +37,8 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static org.ballcat.springsecurity.oauth2.server.authorization.authentication.OAuth2AuthenticationProviderUtils.getAuthenticatedClientElseThrowInvalidClient;
 
 @Slf4j
 public class OAuth2ResourceOwnerPasswordAuthenticationProvider implements AuthenticationProvider {
@@ -92,8 +96,8 @@ public class OAuth2ResourceOwnerPasswordAuthenticationProvider implements Authen
 
 		OAuth2ResourceOwnerPasswordAuthenticationToken resourceOwnerPasswordAuthentication = (OAuth2ResourceOwnerPasswordAuthenticationToken) authentication;
 
-		OAuth2ClientAuthenticationToken clientPrincipal = Oauth2ClientAuthenticationUtils
-				.getAuthenticatedClientElseThrowInvalidClient(resourceOwnerPasswordAuthentication);
+		OAuth2ClientAuthenticationToken clientPrincipal = getAuthenticatedClientElseThrowInvalidClient(
+				resourceOwnerPasswordAuthentication);
 
 		RegisteredClient registeredClient = clientPrincipal.getRegisteredClient();
 
@@ -188,6 +192,11 @@ public class OAuth2ResourceOwnerPasswordAuthenticationProvider implements Authen
 				usernamePasswordAuthentication.getPrincipal());
 
 		log.debug("returning OAuth2AccessTokenAuthenticationToken");
+
+		// 切换当前 Authentication 为 User
+		SecurityContext context = SecurityContextHolder.createEmptyContext();
+		context.setAuthentication(usernamePasswordAuthentication);
+		SecurityContextHolder.setContext(context);
 
 		return new OAuth2AccessTokenAuthenticationToken(registeredClient, clientPrincipal, accessToken, refreshToken,
 				additionalParameters);

@@ -9,6 +9,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  *
  * @author hccake
  */
+@Deprecated
 @Getter
 @Setter
 @ConfigurationProperties(prefix = OAuth2AuthorizationServerProperties.PREFIX)
@@ -20,5 +21,13 @@ public class OAuth2AuthorizationServerProperties {
 	 * 登陆验证码开关
 	 */
 	private boolean loginCaptchaEnabled = true;
+
+	/**
+	 * 表单登录地址
+	 * <p>
+	 * - 不配置将使用 security 默认的登录页：/login <br>
+	 * - 配置后则必须自己提供登录页面
+	 */
+	private String formLoginPage = null;
 
 }
