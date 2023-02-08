@@ -17,7 +17,7 @@ public interface Ip2regionSearcher {
 	 * @return 位置
 	 */
 	@Nullable
-	IpInfo search(long ip);
+	IpInfo search(@Nullable long ip);
 
 	/**
 	 * ip 位置 搜索
@@ -25,6 +25,22 @@ public interface Ip2regionSearcher {
 	 * @return 位置
 	 */
 	@Nullable
-	IpInfo search(String ip);
+	IpInfo search(@Nullable String ip);
+
+	/**
+	 * 静默ip 位置 搜索
+	 * @param ip ip
+	 * @return 位置
+	 */
+	@Nullable
+	IpInfo searchQuietly(@Nullable long ip);
+
+	/**
+	 * 静默ip 位置 搜索
+	 * @param ip ip
+	 * @return 位置
+	 */
+	@Nullable
+	IpInfo searchQuietly(@Nullable String ip);
 
 }

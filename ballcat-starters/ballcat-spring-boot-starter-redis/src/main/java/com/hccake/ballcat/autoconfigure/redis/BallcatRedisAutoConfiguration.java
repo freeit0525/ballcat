@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hccake.ballcat.common.redis.RedisHelper;
 import com.hccake.ballcat.common.redis.config.CacheProperties;
 import com.hccake.ballcat.common.redis.config.CachePropertiesHolder;
-import com.hccake.ballcat.common.redis.core.CacheLock;
 import com.hccake.ballcat.common.redis.core.CacheStringAspect;
 import com.hccake.ballcat.common.redis.prefix.IRedisPrefixConverter;
 import com.hccake.ballcat.common.redis.prefix.impl.DefaultRedisPrefixConverter;
@@ -63,34 +62,6 @@ public class BallcatRedisAutoConfiguration {
 	}
 
 	/**
-	 * 初始化CacheLock
-	 * @param stringRedisTemplate 默认使用字符串类型操作，后续扩展
-	 * @return CacheLock
-	 */
-	@Bean
-	@ConditionalOnMissingBean
-	public CacheLock cacheLock(StringRedisTemplate stringRedisTemplate) {
-		CacheLock cacheLock = new CacheLock();
-		cacheLock.setStringRedisTemplate(stringRedisTemplate);
-		return cacheLock;
-	}
-
-	/**
-	 * 缓存注解操作切面</br>
-	 * 必须在CacheLock初始化之后使用
-	 * @param stringRedisTemplate 字符串存储的Redis操作类
-	 * @param cacheSerializer 缓存序列化器
-	 * @return CacheStringAspect 缓存注解操作切面
-	 */
-	@Bean
-	@DependsOn("cacheLock")
-	@ConditionalOnMissingBean
-	public CacheStringAspect cacheStringAspect(StringRedisTemplate stringRedisTemplate,
-			CacheSerializer cacheSerializer) {
-		return new CacheStringAspect(stringRedisTemplate, cacheSerializer);
-	}
-
-	/**
 	 * redis key 前缀处理器
 	 * @return IRedisPrefixConverter
 	 */
@@ -127,6 +98,21 @@ public class BallcatRedisAutoConfiguration {
 	public RedisHelper redisHelper(StringRedisTemplate template) {
 		RedisHelper.setRedisTemplate(template);
 		return RedisHelper.INSTANCE;
+	}
+
+	/**
+	 * 缓存注解操作切面</br>
+	 * 必须在 redisHelper 初始化之后使用
+	 * @param stringRedisTemplate 字符串存储的Redis操作类
+	 * @param cacheSerializer 缓存序列化器
+	 * @return CacheStringAspect 缓存注解操作切面
+	 */
+	@Bean
+	@DependsOn("redisHelper")
+	@ConditionalOnMissingBean
+	public CacheStringAspect cacheStringAspect(StringRedisTemplate stringRedisTemplate,
+			CacheSerializer cacheSerializer) {
+		return new CacheStringAspect(stringRedisTemplate, cacheSerializer);
 	}
 
 }
