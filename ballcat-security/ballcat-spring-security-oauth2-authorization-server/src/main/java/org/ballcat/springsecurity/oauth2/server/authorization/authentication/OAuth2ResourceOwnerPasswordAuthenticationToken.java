@@ -1,12 +1,12 @@
 package org.ballcat.springsecurity.oauth2.server.authorization.authentication;
 
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.springframework.lang.Nullable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
-import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthorizationGrantAuthenticationToken;
+import org.springframework.util.Assert;
 
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -16,14 +16,14 @@ import java.util.Set;
  *
  * @author Hccake
  * @since 1.0.0
- * @see OAuth2AuthorizationGrantAuthenticationToken
+ * @see AbstractOAuth2ResourceOwnerAuthenticationToken
  * @see OAuth2ResourceOwnerPasswordAuthenticationProvider
  */
-public class OAuth2ResourceOwnerPasswordAuthenticationToken extends OAuth2AuthorizationGrantAuthenticationToken {
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
+public class OAuth2ResourceOwnerPasswordAuthenticationToken extends AbstractOAuth2ResourceOwnerAuthenticationToken {
 
 	private final String username;
-
-	private final Set<String> scopes;
 
 	/**
 	 * Constructs an {@code OAuth2ClientCredentialsAuthenticationToken} using the provided
@@ -31,18 +31,10 @@ public class OAuth2ResourceOwnerPasswordAuthenticationToken extends OAuth2Author
 	 * @param clientPrincipal the authenticated client principal
 	 */
 	public OAuth2ResourceOwnerPasswordAuthenticationToken(String username, Authentication clientPrincipal,
-			@Nullable Set<String> scopes, @Nullable Map<String, Object> additionalParameters) {
-		super(AuthorizationGrantType.PASSWORD, clientPrincipal, additionalParameters);
+			@Nullable Map<String, Object> additionalParameters, @Nullable Set<String> scopes) {
+		super(AuthorizationGrantType.PASSWORD, clientPrincipal, additionalParameters, scopes);
+		Assert.hasText(username, "username cannot be empty");
 		this.username = username;
-		this.scopes = Collections.unmodifiableSet(scopes != null ? new HashSet<>(scopes) : Collections.emptySet());
-	}
-
-	/**
-	 * Returns the requested scope(s).
-	 * @return the requested scope(s), or an empty {@code Set} if not available
-	 */
-	public Set<String> getScopes() {
-		return this.scopes;
 	}
 
 	@Override

@@ -43,15 +43,14 @@ public class OAuth2ResourceOwnerPasswordAuthenticationConverter implements Authe
 		MultiValueMap<String, String> parameters = OAuth2EndpointUtils.getParameters(request);
 
 		// scope (OPTIONAL)
+		Set<String> scopes = null;
 		String scope = parameters.getFirst(OAuth2ParameterNames.SCOPE);
 		if (StringUtils.hasText(scope) && parameters.get(OAuth2ParameterNames.SCOPE).size() != 1) {
 			OAuth2EndpointUtils.throwError(OAuth2ErrorCodes.INVALID_REQUEST, OAuth2ParameterNames.SCOPE,
 					OAuth2EndpointUtils.ACCESS_TOKEN_REQUEST_ERROR_URI);
 		}
-
-		Set<String> requestedScopes = null;
 		if (StringUtils.hasText(scope)) {
-			requestedScopes = new HashSet<>(Arrays.asList(StringUtils.delimitedListToStringArray(scope, " ")));
+			scopes = new HashSet<>(Arrays.asList(StringUtils.delimitedListToStringArray(scope, " ")));
 		}
 
 		// username (REQUIRED)
@@ -74,13 +73,14 @@ public class OAuth2ResourceOwnerPasswordAuthenticationConverter implements Authe
 					OAuth2EndpointUtils.ACCESS_TOKEN_REQUEST_ERROR_URI);
 		}
 
-		Map<String, Object> additionalParameters = parameters.entrySet().stream()
-				.filter(e -> !e.getKey().equals(OAuth2ParameterNames.GRANT_TYPE)
-						&& !e.getKey().equals(OAuth2ParameterNames.SCOPE))
-				.collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().get(0)));
+		Map<String, Object> additionalParameters = parameters.entrySet()
+			.stream()
+			.filter(e -> !e.getKey().equals(OAuth2ParameterNames.GRANT_TYPE)
+					&& !e.getKey().equals(OAuth2ParameterNames.SCOPE))
+			.collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().get(0)));
 
-		return new OAuth2ResourceOwnerPasswordAuthenticationToken(username, clientPrincipal, requestedScopes,
-				additionalParameters);
+		return new OAuth2ResourceOwnerPasswordAuthenticationToken(username, clientPrincipal, additionalParameters,
+				scopes);
 
 	}
 

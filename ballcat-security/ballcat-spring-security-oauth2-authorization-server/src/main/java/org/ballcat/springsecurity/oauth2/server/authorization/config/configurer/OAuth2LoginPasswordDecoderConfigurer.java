@@ -10,7 +10,7 @@ import org.springframework.security.oauth2.server.authorization.web.OAuth2Client
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 /**
- * 登陆时的密码解密配置
+ * 登录时的密码解密配置
  *
  * @author hccake
  */
@@ -29,7 +29,7 @@ public class OAuth2LoginPasswordDecoderConfigurer
 	public void configure(HttpSecurity httpSecurity) {
 		// 获取授权服务器配置
 		AuthorizationServerSettings authorizationServerSettings = httpSecurity
-				.getSharedObject(AuthorizationServerSettings.class);
+			.getSharedObject(AuthorizationServerSettings.class);
 
 		// 只处理登录接口
 		AntPathRequestMatcher requestMatcher = new AntPathRequestMatcher(authorizationServerSettings.getTokenEndpoint(),

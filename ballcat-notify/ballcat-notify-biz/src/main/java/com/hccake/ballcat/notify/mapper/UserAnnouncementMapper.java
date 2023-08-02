@@ -32,7 +32,7 @@ public interface UserAnnouncementMapper extends ExtendMapper<UserAnnouncement> {
 	default PageResult<UserAnnouncementPageVO> queryPage(PageParam pageParam, UserAnnouncementQO qo) {
 		IPage<UserAnnouncement> page = this.prodPage(pageParam);
 		LambdaQueryWrapperX<UserAnnouncement> wrapperX = WrappersX.lambdaAliasQueryX(UserAnnouncement.class)
-				.eqIfPresent(UserAnnouncement::getId, qo.getId());
+			.eqIfPresent(UserAnnouncement::getId, qo.getId());
 		this.selectPage(page, wrapperX);
 		IPage<UserAnnouncementPageVO> voPage = page.convert(UserAnnouncementConverter.INSTANCE::poToPageVo);
 		return new PageResult<>(voPage.getRecords(), voPage.getTotal());
@@ -43,11 +43,12 @@ public interface UserAnnouncementMapper extends ExtendMapper<UserAnnouncement> {
 	 * @param userId 用户ID
 	 * @param announcementId 公告ID
 	 */
-	default void updateToReadState(Integer userId, Long announcementId) {
+	default void updateToReadState(Long userId, Long announcementId) {
 		LambdaUpdateWrapper<UserAnnouncement> wrapper = Wrappers.<UserAnnouncement>lambdaUpdate()
-				.set(UserAnnouncement::getState, UserAnnouncementStateEnum.READ.getValue())
-				.set(UserAnnouncement::getReadTime, LocalDateTime.now())
-				.eq(UserAnnouncement::getAnnouncementId, announcementId).eq(UserAnnouncement::getUserId, userId);
+			.set(UserAnnouncement::getState, UserAnnouncementStateEnum.READ.getValue())
+			.set(UserAnnouncement::getReadTime, LocalDateTime.now())
+			.eq(UserAnnouncement::getAnnouncementId, announcementId)
+			.eq(UserAnnouncement::getUserId, userId);
 		this.update(null, wrapper);
 	}
 

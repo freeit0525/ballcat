@@ -32,7 +32,7 @@ public class SysRoleMenuServiceImpl extends ExtendServiceImpl<SysRoleMenuMapper,
 	 */
 	@Override
 	@Transactional(rollbackFor = Exception.class)
-	public Boolean saveRoleMenus(String roleCode, Integer[] menuIds) {
+	public Boolean saveRoleMenus(String roleCode, Long[] menuIds) {
 		// 1、先删除旧数据
 		baseMapper.deleteByRoleCode(roleCode);
 		if (menuIds == null || menuIds.length == 0) {
@@ -40,8 +40,9 @@ public class SysRoleMenuServiceImpl extends ExtendServiceImpl<SysRoleMenuMapper,
 		}
 
 		// 2、再批量插入新数据
-		List<SysRoleMenu> list = Arrays.stream(menuIds).map(menuId -> new SysRoleMenu(roleCode, menuId))
-				.collect(Collectors.toList());
+		List<SysRoleMenu> list = Arrays.stream(menuIds)
+			.map(menuId -> new SysRoleMenu(roleCode, menuId))
+			.collect(Collectors.toList());
 		int i = baseMapper.insertBatchSomeColumn(list);
 		return SqlHelper.retBool(i);
 	}
@@ -71,7 +72,7 @@ public class SysRoleMenuServiceImpl extends ExtendServiceImpl<SysRoleMenuMapper,
 	 * @return 被更新的菜单数
 	 */
 	@Override
-	public int updateMenuId(Integer originalId, Integer menuId) {
+	public int updateMenuId(Long originalId, Long menuId) {
 		return baseMapper.updateMenuId(originalId, menuId);
 	}
 

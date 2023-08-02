@@ -9,7 +9,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.util.ResourceUtils;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.model.*;
-import software.amazon.awssdk.transfer.s3.FileUpload;
+import software.amazon.awssdk.transfer.s3.model.FileUpload;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -87,10 +87,14 @@ class MinioOssTemplateTest extends AbstractOssTemplateTest {
 
 	@Test
 	void getUrlWithCustomPrefix() {
-		URL url = ossTemplate.getS3Client().utilities()
-				.getUrl(GetUrlRequest.builder().bucket(ossTemplate.getOssProperties().getBucket()).key(TEST_OBJECT_NAME)
-						.endpoint(URI.create(ossTemplate.getOssProperties().getEndpoint() + "/测试/"))
-						.region(Region.of(ossTemplate.getOssProperties().getRegion())).build());
+		URL url = ossTemplate.getS3Client()
+			.utilities()
+			.getUrl(GetUrlRequest.builder()
+				.bucket(ossTemplate.getOssProperties().getBucket())
+				.key(TEST_OBJECT_NAME)
+				.endpoint(URI.create(ossTemplate.getOssProperties().getEndpoint() + "/测试/"))
+				.region(Region.of(ossTemplate.getOssProperties().getRegion()))
+				.build());
 
 		System.out.println(url);
 	}

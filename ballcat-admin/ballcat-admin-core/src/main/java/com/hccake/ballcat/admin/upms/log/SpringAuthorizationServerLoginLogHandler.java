@@ -7,7 +7,7 @@ import com.hccake.ballcat.log.enums.LoginEventTypeEnum;
 import com.hccake.ballcat.log.model.entity.LoginLog;
 import com.hccake.ballcat.log.service.LoginLogService;
 import lombok.RequiredArgsConstructor;
-import org.ballcat.springsecurity.oauth2.server.authorization.authentication.OAuth2TokenRevocationResultAuthenticationToken;
+import org.ballcat.springsecurity.oauth2.server.authorization.authentication.OAuth2TokenRevocationAuthenticationToken;
 import org.springframework.context.event.EventListener;
 import org.springframework.security.authentication.ProviderNotFoundException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -36,8 +36,8 @@ public class SpringAuthorizationServerLoginLogHandler implements LoginLogHandler
 	private final AuthorizationServerSettings authorizationServerSettings;
 
 	/**
-	 * 登陆成功事件监听 记录用户登录日志
-	 * @param event 登陆成功 event
+	 * 登录成功事件监听 记录用户登录日志
+	 * @param event 登录成功 event
 	 */
 	@EventListener(AuthenticationSuccessEvent.class)
 	public void onAuthenticationSuccessEvent(AuthenticationSuccessEvent event) {
@@ -57,8 +57,9 @@ public class SpringAuthorizationServerLoginLogHandler implements LoginLogHandler
 		}
 
 		if (username != null) {
-			LoginLog loginLog = prodLoginLog(username).setMsg("登陆成功").setStatus(LogStatusEnum.SUCCESS.getValue())
-					.setEventType(LoginEventTypeEnum.LOGIN.getValue());
+			LoginLog loginLog = prodLoginLog(username).setMsg("登录成功")
+				.setStatus(LogStatusEnum.SUCCESS.getValue())
+				.setEventType(LoginEventTypeEnum.LOGIN.getValue());
 			loginLogService.save(loginLog);
 		}
 	}
@@ -90,7 +91,8 @@ public class SpringAuthorizationServerLoginLogHandler implements LoginLogHandler
 
 		if (username != null) {
 			LoginLog loginLog = prodLoginLog(username).setMsg(event.getException().getMessage())
-					.setEventType(LoginEventTypeEnum.LOGIN.getValue()).setStatus(LogStatusEnum.FAIL.getValue());
+				.setEventType(LoginEventTypeEnum.LOGIN.getValue())
+				.setStatus(LogStatusEnum.FAIL.getValue());
 			loginLogService.save(loginLog);
 		}
 	}
@@ -109,9 +111,8 @@ public class SpringAuthorizationServerLoginLogHandler implements LoginLogHandler
 		boolean isOauth2Login = request.getRequestURI().equals(tokenRevocationEndpoint);
 
 		// Oauth2撤销令牌 和表单登出 处理分开
-		if (isOauth2Login && source instanceof OAuth2TokenRevocationResultAuthenticationToken) {
-			OAuth2Authorization authorization = ((OAuth2TokenRevocationResultAuthenticationToken) source)
-					.getAuthorization();
+		if (isOauth2Login && source instanceof OAuth2TokenRevocationAuthenticationToken) {
+			OAuth2Authorization authorization = ((OAuth2TokenRevocationAuthenticationToken) source).getAuthorization();
 			username = authorization.getPrincipalName();
 		}
 		else if (!isOauth2Login && source instanceof UsernamePasswordAuthenticationToken) {
@@ -120,7 +121,7 @@ public class SpringAuthorizationServerLoginLogHandler implements LoginLogHandler
 
 		if (username != null) {
 			LoginLog loginLog = prodLoginLog(username).setMsg("登出成功")
-					.setEventType(LoginEventTypeEnum.LOGOUT.getValue());
+				.setEventType(LoginEventTypeEnum.LOGOUT.getValue());
 			loginLogService.save(loginLog);
 		}
 	}

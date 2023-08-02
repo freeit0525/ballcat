@@ -36,8 +36,8 @@ public class AnnouncementLoginEventListener {
 	private final UserAnnouncementService userAnnouncementService;
 
 	/**
-	 * 登陆成功时间监听 用户未读公告生成
-	 * @param event 登陆成功 event
+	 * 登录成功时间监听 用户未读公告生成
+	 * @param event 登录成功 event
 	 */
 	@EventListener(AuthenticationSuccessEvent.class)
 	public void onAuthenticationSuccessEvent(AuthenticationSuccessEvent event) throws InterruptedException {
@@ -53,15 +53,17 @@ public class AnnouncementLoginEventListener {
 			SysUser sysUser = getSysUser(user);
 
 			// 获取当前用户未拉取过的公告信息
-			Integer userId = sysUser.getUserId();
+			Long userId = sysUser.getUserId();
 			List<Announcement> announcements = announcementService.listUnPulled(userId);
 			// 获取当前用户的各个过滤属性
 			Map<Integer, Object> filterAttrs = recipientHandler.getFilterAttrs(sysUser);
 			// 获取符合当前用户条件的，且接收类型包含站内的公告，保存其关联关系
 			List<UserAnnouncement> userAnnouncements = announcements.stream()
-					.filter(x -> x.getReceiveMode().contains(NotifyChannelEnum.STATION.getValue()))
-					.filter(x -> filterMatched(x, filterAttrs)).map(Announcement::getId)
-					.map(id -> userAnnouncementService.prodUserAnnouncement(userId, id)).collect(Collectors.toList());
+				.filter(x -> x.getReceiveMode().contains(NotifyChannelEnum.STATION.getValue()))
+				.filter(x -> filterMatched(x, filterAttrs))
+				.map(Announcement::getId)
+				.map(id -> userAnnouncementService.prodUserAnnouncement(userId, id))
+				.collect(Collectors.toList());
 			try {
 				userAnnouncementService.saveBatch(userAnnouncements);
 			}

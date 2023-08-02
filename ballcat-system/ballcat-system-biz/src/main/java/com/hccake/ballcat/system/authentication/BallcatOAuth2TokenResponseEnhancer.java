@@ -24,7 +24,9 @@ public class BallcatOAuth2TokenResponseEnhancer implements OAuth2TokenResponseEn
 	@Override
 	public Map<String, Object> enhance(OAuth2AccessTokenAuthenticationToken accessTokenAuthentication) {
 		Object principal = Optional.ofNullable(SecurityContextHolder.getContext())
-				.map(SecurityContext::getAuthentication).map(Authentication::getPrincipal).orElse(null);
+			.map(SecurityContext::getAuthentication)
+			.map(Authentication::getPrincipal)
+			.orElse(null);
 
 		// token 附属信息
 		Map<String, Object> additionalParameters = accessTokenAuthentication.getAdditionalParameters();
@@ -38,7 +40,7 @@ public class BallcatOAuth2TokenResponseEnhancer implements OAuth2TokenResponseEn
 			SysUserInfo sysUserInfo = getSysUserInfo(user);
 			additionalParameters.put(TokenAttributeNameConstants.INFO, sysUserInfo);
 
-			// 默认在登陆时只把角色和权限的信息返回
+			// 默认在登录时只把角色和权限的信息返回
 			Map<String, Object> resultAttributes = new HashMap<>(2);
 			Map<String, Object> attributes = user.getAttributes();
 			resultAttributes.put(UserAttributeNameConstants.ROLE_CODES,
@@ -64,6 +66,9 @@ public class BallcatOAuth2TokenResponseEnhancer implements OAuth2TokenResponseEn
 		sysUserInfo.setAvatar(user.getAvatar());
 		sysUserInfo.setOrganizationId(user.getOrganizationId());
 		sysUserInfo.setType(user.getType());
+		sysUserInfo.setPhoneNumber(user.getPhoneNumber());
+		sysUserInfo.setEmail(user.getEmail());
+		sysUserInfo.setGender(user.getGender());
 		return sysUserInfo;
 	}
 

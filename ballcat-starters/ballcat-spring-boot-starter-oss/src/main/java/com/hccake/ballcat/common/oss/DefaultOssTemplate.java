@@ -12,13 +12,18 @@ import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3Configuration;
 import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
-import software.amazon.awssdk.transfer.s3.*;
+import software.amazon.awssdk.transfer.s3.S3TransferManager;
+import software.amazon.awssdk.transfer.s3.model.FileUpload;
+import software.amazon.awssdk.transfer.s3.model.Upload;
+import software.amazon.awssdk.transfer.s3.model.UploadFileRequest;
+import software.amazon.awssdk.transfer.s3.model.UploadRequest;
 
 import javax.activation.MimetypesFileTypeMap;
 import java.io.File;
@@ -143,7 +148,7 @@ public class DefaultOssTemplate implements InitializingBean, DisposableBean, Oss
 	@Override
 	public List<S3Object> listObjects(String bucket, String prefix, Integer maxKeys) {
 		return s3Client.listObjects(ListObjectsRequest.builder().maxKeys(maxKeys).prefix(prefix).bucket(bucket).build())
-				.contents();
+			.contents();
 	}
 
 	/**
@@ -162,10 +167,12 @@ public class DefaultOssTemplate implements InitializingBean, DisposableBean, Oss
 	@Override
 	public PutObjectResponse putObject(String bucket, String key, File file)
 			throws AwsServiceException, SdkClientException, S3Exception, IOException {
-		return s3Client.putObject(
-				PutObjectRequest.builder().bucket(bucket).key(key).contentLength(file.length())
-						.contentType(MimetypesFileTypeMap.getDefaultFileTypeMap().getContentType(file)).build(),
-				RequestBody.fromFile(file));
+		return s3Client.putObject(PutObjectRequest.builder()
+			.bucket(bucket)
+			.key(key)
+			.contentLength(file.length())
+			.contentType(MimetypesFileTypeMap.getDefaultFileTypeMap().getContentType(file))
+			.build(), RequestBody.fromFile(file));
 	}
 
 	/**
@@ -238,8 +245,10 @@ public class DefaultOssTemplate implements InitializingBean, DisposableBean, Oss
 
 		GetObjectRequest getObjectRequest = GetObjectRequest.builder().bucket(bucket).key(key).build();
 
-		GetObjectPresignRequest getObjectPresignRequest = GetObjectPresignRequest.builder().signatureDuration(duration)
-				.getObjectRequest(getObjectRequest).build();
+		GetObjectPresignRequest getObjectPresignRequest = GetObjectPresignRequest.builder()
+			.signatureDuration(duration)
+			.getObjectRequest(getObjectRequest)
+			.build();
 
 		PresignedGetObjectRequest presignedGetObjectRequest = s3Presigner.presignGetObject(getObjectPresignRequest);
 		URL url = presignedGetObjectRequest.url();
@@ -256,24 +265,32 @@ public class DefaultOssTemplate implements InitializingBean, DisposableBean, Oss
 				ossProperties.getAccessSecret());
 		this.awsCredentialsProvider = StaticCredentialsProvider.create(awsCredentials);
 
-		this.s3Client = S3Client.builder().credentialsProvider(awsCredentialsProvider)
-				.region(Region.of(ossProperties.getRegion()))
-				.serviceConfiguration(
-						S3Configuration.builder().pathStyleAccessEnabled(ossProperties.getPathStyleAccess()).build())
-				.endpointOverride(URI.create(ossProperties.getEndpoint())).build();
+		this.s3Client = S3Client.builder()
+			.credentialsProvider(awsCredentialsProvider)
+			.region(Region.of(ossProperties.getRegion()))
+			.serviceConfiguration(S3Configuration.builder()
+				.pathStyleAccessEnabled(ossProperties.getPathStyleAccess())
+				.chunkedEncodingEnabled(ossProperties.getChunkedEncoding())
+				.build())
+			.endpointOverride(URI.create(ossProperties.getEndpoint()))
+			.build();
 
 		// 构建预签名工具
 		this.s3Presigner = S3Presigner.builder()
-				.serviceConfiguration(
-						S3Configuration.builder().pathStyleAccessEnabled(ossProperties.getPathStyleAccess()).build())
-				.region(Region.of(ossProperties.getRegion())).endpointOverride(URI.create(ossProperties.getEndpoint()))
-				.credentialsProvider(awsCredentialsProvider).build();
+			.serviceConfiguration(
+					S3Configuration.builder().pathStyleAccessEnabled(ossProperties.getPathStyleAccess()).build())
+			.region(Region.of(ossProperties.getRegion()))
+			.endpointOverride(URI.create(ossProperties.getEndpoint()))
+			.credentialsProvider(awsCredentialsProvider)
+			.build();
 		// 构建S3高级传输工具
 		this.s3TransferManager = S3TransferManager.builder()
-				.s3ClientConfiguration(S3ClientConfiguration.builder().credentialsProvider(getAwsCredentialsProvider())
-						.region(Region.of(getOssProperties().getRegion()))
-						.endpointOverride(URI.create(getOssProperties().getEndpoint())).build())
-				.build();
+			.s3Client(S3AsyncClient.builder()
+				.credentialsProvider(getAwsCredentialsProvider())
+				.region(Region.of(getOssProperties().getRegion()))
+				.endpointOverride(URI.create(getOssProperties().getEndpoint()))
+				.build())
+			.build();
 	}
 
 	@Override
